@@ -58,26 +58,32 @@ const Services = () => {
     { icon: Clock, value: "< 5min", label: "Traitement", color: "text-purple-600" }
   ];
 
+  const handleAction = (actionType: string) => {
+    console.log(`Action triggered: ${actionType}`);
+    // Ici vous pouvez ajouter votre logique d'action
+    alert(`Action: ${actionType} - Fonctionnalité en cours de développement`);
+  };
+
   return (
-    <section id="services" className="py-20 bg-gray-50">
+    <section id="services" className="py-20 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Nos <span className="bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">Services</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            Nos <span className="bg-gradient-to-r from-gradient-from to-gradient-to bg-clip-text text-transparent">Services</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
             Une suite complète d'outils IA pour automatiser et optimiser le traitement de vos données médicales
           </p>
 
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-8 mb-16">
             {stats.map((stat, index) => (
-              <div key={index} className="flex items-center space-x-3 bg-white px-6 py-4 rounded-2xl shadow-sm">
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              <div key={index} className="flex items-center space-x-3 bg-card px-6 py-4 rounded-2xl shadow-sm border border-border">
+                <stat.icon className="h-6 w-6 text-primary" />
                 <div className="text-left">
-                  <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
+                  <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </div>
               </div>
             ))}
@@ -87,32 +93,43 @@ const Services = () => {
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {services.map((service, index) => (
-            <Card key={index} className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 overflow-hidden">
+            <Card key={index} className="group hover:shadow-2xl transition-all duration-300 bg-card hover:bg-card/80 overflow-hidden border border-border">
               <CardHeader className="pb-4">
-                <div className={`w-14 h-14 bg-gradient-to-br ${service.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <service.icon className="h-7 w-7 text-white" />
+                <div className="w-14 h-14 bg-gradient-to-br from-gradient-from to-gradient-to rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <service.icon className="h-7 w-7 text-primary-foreground" />
                 </div>
-                <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                   {service.title}
                 </CardTitle>
-                <CardDescription className="text-gray-600 text-base leading-relaxed">
+                <CardDescription className="text-muted-foreground text-base leading-relaxed">
                   {service.description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
                 <ul className="space-y-2 mb-6">
                   {service.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center text-sm text-gray-700">
-                      <div className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-teal-500 rounded-full mr-3"></div>
+                    <li key={featureIndex} className="flex items-center text-sm text-muted-foreground">
+                      <div className="w-1.5 h-1.5 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full mr-3"></div>
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <Button 
                   variant="outline" 
-                  className="w-full group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 transition-all duration-200"
+                  onClick={() => {
+                    if (service.title.includes("Analyse")) handleAction("Analyser un fichier");
+                    else if (service.title.includes("Extraction")) handleAction("Synchroniser les données");
+                    else if (service.title.includes("Traitement")) handleAction("Générer un rapport");
+                    else if (service.title.includes("Recommandation")) handleAction("Gestion des utilisateurs");
+                    else handleAction("En savoir plus");
+                  }}
+                  className="w-full group-hover:bg-primary/10 group-hover:border-primary group-hover:text-primary transition-all duration-200"
                 >
-                  En savoir plus
+                  {service.title.includes("Analyse") ? "Analyser un fichier" :
+                   service.title.includes("Extraction") ? "Synchroniser les données" :
+                   service.title.includes("Traitement") ? "Générer un rapport" :
+                   service.title.includes("Recommandation") ? "Gestion des utilisateurs" :
+                   "En savoir plus"}
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </CardContent>
@@ -121,7 +138,7 @@ const Services = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center bg-gradient-to-r from-blue-600 to-teal-500 rounded-3xl p-12 text-white">
+        <div className="text-center bg-gradient-to-r from-gradient-from to-gradient-to rounded-3xl p-12 text-primary-foreground">
           <h3 className="text-3xl md:text-4xl font-bold mb-4">
             Prêt à transformer vos données ?
           </h3>
@@ -130,7 +147,8 @@ const Services = () => {
           </p>
           <Button 
             size="lg"
-            className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            className="bg-background text-foreground hover:bg-muted px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            onClick={() => handleAction("Démarrer maintenant")}
           >
             Démarrer maintenant
             <ArrowRight className="ml-2 h-5 w-5" />
