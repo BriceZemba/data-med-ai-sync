@@ -7,6 +7,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import QuickActions from "@/components/dashboard/QuickActions";
 import RecentActivity from "@/components/dashboard/RecentActivity";
+import { analyzeFile, restructureFile, extractClientData } from "@/utils/fileAnalysis";
 
 const Dashboard = () => {
   const { user, isLoaded } = useUser();
@@ -40,17 +41,44 @@ const Dashboard = () => {
     setIsAnalyzing(true);
     
     try {
-      // Simulate file analysis
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      toast({
+        title: "Analyse en cours",
+        description: `Analyse du fichier ${file.name}...`,
+      });
+
+      // Analyser le fichier
+      let analysisResult = await analyzeFile(file);
       
+      // Restructurer si nécessaire
+      if (!analysisResult.isWellStructured) {
+        toast({
+          title: "Restructuration automatique",
+          description: "Tentative de restructuration du fichier...",
+        });
+        analysisResult = await restructureFile(analysisResult);
+      }
+
+      // Extraction des données client
+      const clientData = await extractClientData(analysisResult);
+
+      // Préparer les données du rapport
+      const reportData = {
+        ...analysisResult,
+        clientData
+      };
+
+      // Sauvegarder pour le rapport
+      localStorage.setItem('reportData', JSON.stringify(reportData));
+
       toast({
         title: "Analyse terminée",
-        description: `Le fichier ${file.name} a été analysé avec succès.`,
+        description: `Le fichier ${file.name} a été analysé avec succès. ${clientData.length} client(s) identifié(s).`,
       });
+      
     } catch (error) {
       toast({
         title: "Erreur d'analyse",
-        description: "Une erreur s'est produite lors de l'analyse du fichier.",
+        description: error instanceof Error ? error.message : "Une erreur s'est produite lors de l'analyse du fichier.",
         variant: "destructive",
       });
     } finally {
@@ -63,16 +91,38 @@ const Dashboard = () => {
   };
 
   const handleReportGeneration = async () => {
+    const reportData = localStorage.getItem('reportData');
+    
+    if (!reportData) {
+      toast({
+        title: "Aucune donnée trouvée",
+        description: "Veuillez d'abord analyser un fichier avant de générer un rapport.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGeneratingReport(true);
     
     try {
-      // Simulate report generation
+      toast({
+        title: "Génération du rapport",
+        description: "Préparation du rapport détaillé...",
+      });
+
+      // Simuler la génération du rapport
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       toast({
-        title: "Rapport généré",
-        description: "Votre rapport détaillé a été créé avec succès.",
+        title: "Rapport prêt",
+        description: "Redirection vers le rapport détaillé...",
       });
+
+      // Rediriger vers la page de rapport
+      setTimeout(() => {
+        navigate("/report", { state: { reportData: JSON.parse(reportData) } });
+      }, 1000);
+      
     } catch (error) {
       toast({
         title: "Erreur de génération",

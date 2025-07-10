@@ -1,6 +1,9 @@
 
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { 
   FileSpreadsheet, 
   Users, 
@@ -12,43 +15,55 @@ import {
   Shield,
   Clock
 } from "lucide-react";
+import { analyzeFile, restructureFile, extractClientData } from "@/utils/fileAnalysis";
 
 const Services = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentAction, setCurrentAction] = useState<string>("");
+
   const services = [
     {
       icon: FileSpreadsheet,
       title: "Analyse automatique de fichiers",
       description: "Traitement intelligent de vos fichiers CSV et Excel avec détection automatique des anomalies et suggestions d'amélioration.",
       features: ["Format CSV/Excel", "Détection d'erreurs", "Validation automatique"],
-      color: "from-blue-500 to-blue-600"
+      color: "from-blue-500 to-blue-600",
+      action: "analyze"
     },
     {
       icon: Users,
       title: "Extraction de données client",
       description: "Extraction et structuration automatisée des informations clients avec classification intelligente et enrichissement des données.",
       features: ["Classification IA", "Enrichissement", "Export sécurisé"],
-      color: "from-teal-500 to-teal-600"
+      color: "from-teal-500 to-teal-600",
+      action: "extract"
     },
     {
       icon: Bot,
       title: "Traitement automatique",
       description: "Automatisation complète du workflow de traitement des données avec intelligence artificielle avancée et apprentissage continu.",
       features: ["IA avancée", "Apprentissage", "Workflow automatique"],
-      color: "from-purple-500 to-purple-600"
+      color: "from-purple-500 to-purple-600",
+      action: "process"
     },
     {
       icon: Star,
       title: "Recommandation de services",
       description: "Système de recommandation intelligent basé sur l'analyse prédictive pour optimiser vos processus métier.",
       features: ["Analyse prédictive", "Recommandations", "Optimisation"],
-      color: "from-orange-500 to-orange-600"
+      color: "from-orange-500 to-orange-600",
+      action: "recommend"
     },
     {
       icon: Database,
       title: "Comparaison avec base de données",
       description: "Synchronisation et comparaison en temps réel avec vos bases de données existantes pour garantir la cohérence des informations.",
       features: ["Sync temps réel", "Détection de doublons", "Intégration API"],
-      color: "from-green-500 to-green-600"
+      color: "from-green-500 to-green-600",
+      action: "sync"
     }
   ];
 
@@ -58,14 +73,106 @@ const Services = () => {
     { icon: Clock, value: "< 5min", label: "Traitement", color: "text-purple-600" }
   ];
 
-  const handleAction = (actionType: string) => {
-    console.log(`Action triggered: ${actionType}`);
-    // Ici vous pouvez ajouter votre logique d'action
-    alert(`Action: ${actionType} - Fonctionnalité en cours de développement`);
+  const handleServiceAction = (actionType: string) => {
+    if (actionType === "analyze" || actionType === "extract") {
+      setCurrentAction(actionType);
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    } else {
+      toast({
+        title: "Fonctionnalité en développement",
+        description: `${actionType === "process" ? "Traitement automatique" : 
+                     actionType === "recommend" ? "Recommandation de services" : 
+                     "Comparaison avec base de données"} sera bientôt disponible.`,
+      });
+    }
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessing(true);
+    
+    try {
+      // Étape 1: Analyser le fichier
+      toast({
+        title: "Analyse en cours",
+        description: `Analyse du fichier ${file.name}...`,
+      });
+
+      let analysisResult = await analyzeFile(file);
+      
+      // Étape 2: Restructurer si nécessaire
+      if (!analysisResult.isWellStructured) {
+        toast({
+          title: "Restructuration automatique",
+          description: "Le fichier n'est pas bien structuré. Tentative de restructuration...",
+        });
+        
+        analysisResult = await restructureFile(analysisResult);
+      }
+
+      // Étape 3: Extraction de données client si demandée
+      let clientData = null;
+      if (currentAction === "extract") {
+        toast({
+          title: "Extraction des données client",
+          description: "Extraction et enrichissement des informations client...",
+        });
+        
+        clientData = await extractClientData(analysisResult);
+      }
+
+      // Préparer les données du rapport
+      const reportData = {
+        ...analysisResult,
+        clientData: clientData || undefined
+      };
+
+      // Sauvegarder dans localStorage pour le rapport
+      localStorage.setItem('reportData', JSON.stringify(reportData));
+
+      toast({
+        title: currentAction === "extract" ? "Extraction terminée" : "Analyse terminée",
+        description: `${currentAction === "extract" ? 
+          `${clientData?.length || 0} client(s) identifié(s) et enrichi(s)` : 
+          "Fichier analysé avec succès"}. Redirection vers le rapport...`,
+      });
+
+      // Rediriger vers la page de rapport
+      setTimeout(() => {
+        navigate("/report", { state: { reportData } });
+      }, 1500);
+
+    } catch (error) {
+      toast({
+        title: "Erreur lors du traitement",
+        description: error instanceof Error ? error.message : "Une erreur inconnue s'est produite.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+      setCurrentAction("");
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   return (
     <section id="services" className="py-20 bg-muted/30">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,.xlsx,.xls,.json"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
@@ -116,21 +223,25 @@ const Services = () => {
                 </ul>
                 <Button 
                   variant="outline" 
-                  onClick={() => {
-                    if (service.title.includes("Analyse")) handleAction("Analyser un fichier");
-                    else if (service.title.includes("Extraction")) handleAction("Synchroniser les données");
-                    else if (service.title.includes("Traitement")) handleAction("Générer un rapport");
-                    else if (service.title.includes("Recommandation")) handleAction("Gestion des utilisateurs");
-                    else handleAction("En savoir plus");
-                  }}
+                  onClick={() => handleServiceAction(service.action)}
+                  disabled={isProcessing}
                   className="w-full group-hover:bg-primary/10 group-hover:border-primary group-hover:text-primary transition-all duration-200"
                 >
-                  {service.title.includes("Analyse") ? "Analyser un fichier" :
-                   service.title.includes("Extraction") ? "Synchroniser les données" :
-                   service.title.includes("Traitement") ? "Générer un rapport" :
-                   service.title.includes("Recommandation") ? "Gestion des utilisateurs" :
-                   "En savoir plus"}
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  {isProcessing && currentAction === service.action ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                      Traitement...
+                    </>
+                  ) : (
+                    <>
+                      {service.title.includes("Analyse") ? "Analyser un fichier" :
+                       service.title.includes("Extraction") ? "Extraire les données" :
+                       service.title.includes("Traitement") ? "Traitement auto" :
+                       service.title.includes("Recommandation") ? "Recommandations" :
+                       "Synchroniser"}
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -148,9 +259,9 @@ const Services = () => {
           <Button 
             size="lg"
             className="bg-background text-foreground hover:bg-muted px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-            onClick={() => handleAction("Démarrer maintenant")}
+            onClick={() => navigate("/dashboard")}
           >
-            Démarrer maintenant
+            Accéder au Dashboard
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
