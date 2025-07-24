@@ -1,0 +1,9 @@
+Nom,Prénom,SECT ACT,Semaine,STRUCTURE,Nom du compte,SPECIALITE,POTENTIEL,VILLE,ADRESSE
+Dupont,Jean,A1,S1,Hôpital Central,Dr Dupont,Cardiologie,Élevé,Paris,123 Rue de la Paix
+Martin,Marie,B2,S2,Clinique du Nord,Dr Martin,Neurologie,Moyen,Lyon,456 Avenue des Fleurs
+Durand,Pierre,A1,S1,Centre Médical,Dr Durand,Pédiatrie,Élevé,Marseille,789 Boulevard du Soleil
+Moreau,Sophie,,S3,Hôpital Sud,Dr Moreau,Gynécologie,Faible,Toulouse,321 Rue des Oliviers
+Petit,Luc,C3,S2,,Dr Petit,Orthopédie,Moyen,Nice,654 Avenue de la Mer
+Bernard,Anne,B1,S1,Clinique Privée,Dr Bernard,,Élevé,Nantes,987 Rue du Commerce
+Roux,Paul,A2,,Hôpital Est,Dr Roux,Dermatologie,Moyen,Strasbourg,147 Place de la Cathédrale
+Fournier,Claire,B2,S3,Centre Spécialisé,Dr Fournier,Psychiatrie,Élevé,Bordeaux,258 Cours de l'Intendance
