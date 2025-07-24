@@ -2,6 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, CheckCircle2, Clock, TrendingUp } from "lucide-react";
 
+
 const DashboardStats = () => {
   const stats = [
     { label: "Fichiers traités", value: "247", icon: FileText, color: "text-primary", bg: "bg-primary/10" },
